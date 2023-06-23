@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <title></title>
+    <script defer src="index.js"></script>
+    <style>
+      * {
+        font-family:'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+      }
+      input {
+        width: 90%;
+        padding: 1%;
+        font-size: large;
+        border: 1px solid black;
+        outline: none;
+      }
+      button {
+        font-size: large;
+      }
+      .div-video {
+        border: 1px solid black;
+        margin: 3% auto;
+      }
+    </style>
+</head>
+<body>
+  <p>this is mine so you can trust (probably) but normally don't trust these websites</p>
+
+  <p>searches made today: <span id="span-search-count">{{searchCount}}</span></p>
+  <p>max limit is 100/day, this uses a free service lol deal with it</p>
+  <p>*search isn't perfect, also i limited it to first 15 results, if that's not enough tell me</p>
+
+  <input type="text" id="input-search-bar" placeholder="search for video...">
+  <button id="button-search">go</button>
+
+  <div id="div-search-results">
+  </div>
+
+</body>
