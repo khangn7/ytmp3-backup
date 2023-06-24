@@ -2,10 +2,7 @@ from flask import Flask, render_template, request, send_file
 from replit import db
 import urllib.parse
 import os
-
-from datetime import date
-import time
-from zoneinfo import ZoneInfo
+from datetime import datetime
 
 from ytmp3 import downloadMp3
 from ytscraper import get_videos
@@ -18,10 +15,17 @@ db["searchCount"] = 0
 # check current date, if different, reset
 # *google api quota resets at midnight Pacific Time (PT)
 
-# in Pacific Time
-db["dayOfMonth"] = date.fromtimestamp(time.time(), tz=ZoneInfo("America/Los_Angeles")).day
+# returns int
+def pacificTimeDay():
+  dt = datetime.utcnow()
+  d = int(dt.day)
+  h = int(dt.hour)
+  if h - 7 < 0:
+    d -= 1
+  return d
+  
+db["pacificTimeDay"] = pacificTimeDay()
 
-quit()
 
 def resetSearchCount():
   db["searchCount"] = 0
@@ -35,8 +39,12 @@ valid_get_paths = ["index.html", "index.js"]
 @app.get("/<path>")
 def getHandler(path="index.html"):
 
-  # urllib.parse.unquote(path)
-  print(path)
+  # print(path)
+  
+  pcd = pacificTimeDay()
+  if db["pacificTimeDay"] != pcd:
+    resetSearchCount()
+    db["pacificTimeDay"] = pcd
 
   try:
     valid_get_paths.index(path)
@@ -50,12 +58,11 @@ def getHandler(path="index.html"):
   return template, 200
 
 
-downloaded_file = ["Me at the zoo.mp3"]
-@app.route('/download/<filename>')
-def downloadHandle(filename):
+@app.route('/downloadSong/')
+def downloadHandle():
   print("download handle")
+  filename = os.listdir("./downloads/")[0]
   try:
-    urllib.parse.unquote(filename)
     return send_file("./downloads/"+filename, as_attachment=True)
   except Exception as e:
     print(str(e))
@@ -68,6 +75,14 @@ def getSearchResults(user_input_str):
   db["searchCount"] = db["searchCount"] + 1
 
   results = get_videos(user_input_str)
+  if len(results) == 0:
+    return [{
+      "videoTitle": "your search is too obscure, or something went wrong. the search limit might be reached",
+      "channelTitle": 0,
+      "videoId": 0,
+      "thumbnail": "https://support.content.office.net/en-us/media/4c10ecfd-3008-4b00-9f98-d41b6f899c2d.png"
+    }]
+  
   response_arr = []
   for searchResult in results:
     response_arr.append({
@@ -84,12 +99,10 @@ def downloadOnServer(videoId):
   filename = downloadMp3("https://www.youtube.com/watch?v=" + videoId, "./downloads/")
   filename = filename[filename.rfind("/") + 1:]
 
-  downloaded_file[0] = filename
-  
   return filename
 
 def deleteMp3File(x):
-  relativeFilepath = "./downloads/" + downloaded_file[0]
+  relativeFilepath = "./downloads/" + os.listdir("./downloads/")[0]
   print(relativeFilepath)
   if os.path.isfile(relativeFilepath):
     print(os.remove(relativeFilepath))

@@ -60,10 +60,14 @@ async function getDownloadLink(e)
 {
   let targetId = e.target.id,
       videoId = targetId.slice(targetId.indexOf("-") + 1);
-  // url is url to resource on server
+
+  div_search_results.innerHTML = "retrieving file...";
+
+  // returns name of mp3 file
   let url = await postToServer("download", videoId);
+  
   // clear videos and create link
-  div_search_results.innerHTML = `<br><br><a id="download-link" href="download/${url}" download>click to download mp3 file</a>*can only press once`;
+  div_search_results.innerHTML = `<br><br><a id="download-link" href="downloadSong/" download>click to download mp3 file</a>`;
   
   div_search_results.innerHTML += "<br><button id='button-back'>go back</button>";
   document.getElementById("button-back").addEventListener("click", async () => {

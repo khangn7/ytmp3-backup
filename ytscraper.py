@@ -30,6 +30,9 @@ def get_videos(unformattedQueryStr, try_no=5):
     return get_videos(unformattedQueryStr, try_no-1)
   
   json = response.json()
+
+  if json.get("error", False):
+    return []
   
   videos = []
   
